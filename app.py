@@ -1,11 +1,13 @@
 from flask import Flask, render_template
 from controller.equipo_controller import equipo_bp
+from controller.integrante_controller import integrante_bp 
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
 
 # Registrar el blueprint para inscripciones
 app.register_blueprint(equipo_bp, url_prefix='/')
+app.register_blueprint(integrante_bp, url_prefix='/integrante')
 
 # Ruta principal
 @app.route('/')
