@@ -54,6 +54,3 @@ def inscribir_equipo():
 
     return  render_template('inscribir_equipo.html')
 
-
-# Ruta para mostrar todos los equipos consultados desde la API
-

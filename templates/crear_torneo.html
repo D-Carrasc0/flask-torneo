@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Torneo</title>
+</head>
+<body>
+    <h1>Crear un nuevo torneo</h1>
+    <form action="{{ url_for('torneo.crear_torneo') }}" method="POST">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" required><br><br>
+
+        <label for="fecha_inicio">Fecha de inicio:</label>
+        <input type="date" id="fecha_inicio" name="fecha_inicio" required><br><br>
+
+        <label for="fecha_termino">Fecha de término:</label>
+        <input type="date" id="fecha_termino" name="fecha_termino" required><br><br>
+
+        <label for="estado">Estado:</label>
+        <select name="estado" id="estado" required>
+            <option value="activo">Activo</option>
+            <option value="inactivo">Inactivo</option>
+        </select><br><br>
+
+        <button type="submit">Crear Torneo</button>
+    </form>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul>
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% endwith %}
+</body>
+</html>

@@ -1,6 +1,13 @@
 from flask import Flask, render_template
 from controller.equipo_controller import equipo_bp
 from controller.integrante_controller import integrante_bp 
+from controller.fase_controller import fase_bp
+from controller.desafio_controller import desafio_bp
+from controller.torneo_controller import torneo_bp
+from controller.registro_controller import registro_bp
+from controller.resultado_fase_controller import resultado_fase_bp
+from controller.resultado_torneo_controller import resultado_torneo_bp
+from controller.respuesta_codigo_controller import respuesta_codigo_bp
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
@@ -8,6 +15,13 @@ app.secret_key = 'secret_key'
 # Registrar el blueprint para inscripciones
 app.register_blueprint(equipo_bp, url_prefix='/')
 app.register_blueprint(integrante_bp, url_prefix='/integrante')
+app.register_blueprint(fase_bp, url_prefix='/fase')
+app.register_blueprint(desafio_bp, url_prefix='/desafio')
+app.register_blueprint(torneo_bp, url_prefix='/torneo')
+app.register_blueprint(registro_bp, url_prefix='/registro')
+app.register_blueprint(resultado_fase_bp, url_prefix='/resultado_fase') 
+app.register_blueprint(resultado_torneo_bp, url_prefix='/resultado_torneo')
+app.register_blueprint(respuesta_codigo_bp, url_prefix='/respuesta_codigo')
 
 # Ruta principal
 @app.route('/')
