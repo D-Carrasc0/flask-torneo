@@ -7,8 +7,8 @@ registro_bp = Blueprint('registro', __name__)
 # Asignar un nuevo registro
 @registro_bp.route('/crear', methods=['POST'])
 def crear_registro():
-    torneo_id = request.form.get('torneo_id')
-    equipo_id = request.form.get('equipo_id')
+    torneo_id = int(request.form.get('torneo_id'))
+    equipo_id = int(request.form.get('equipo_id'))
 
     if not torneo_id or not equipo_id:
         flash('Faltan datos obligatorios', 'danger')
@@ -36,4 +36,4 @@ def crear_registro():
 
 @registro_bp.route('/crear/form', methods=['GET'])
 def crear_registro_form():
-    return render_template('crear_registro.html')
+    return render_template('crear_registro_torneo.html')

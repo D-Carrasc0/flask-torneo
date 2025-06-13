@@ -8,8 +8,8 @@ fase_bp = Blueprint('fase', __name__)
 @fase_bp.route('/crear', methods=['POST'])
 def crear_fase():
     dificultad = request.form.get('dificultad')
-    torneo_id = request.form.get('torneo_id')
-
+    torneo_id = int(request.form.get('torneo_id')
+)
     if not dificultad or not torneo_id:
         flash('Faltan datos obligatorios', 'danger')
         return redirect(url_for('fase.crear_fase_form'))

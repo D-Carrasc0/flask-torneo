@@ -9,8 +9,8 @@ desafio_bp = Blueprint('desafio', __name__)
 def crear_desafio():
     titulo = request.form.get('titulo')
     descripcion = request.form.get('descripcion')
-    fase_id = request.form.get('fase_id')
-    torneo_id = request.form.get('torneo_id')
+    fase_id = int(request.form.get('fase_id'))
+    torneo_id = int(request.form.get('torneo_id'))
 
     if not titulo or not descripcion or not fase_id or not torneo_id:
         flash('Faltan datos obligatorios', 'danger')

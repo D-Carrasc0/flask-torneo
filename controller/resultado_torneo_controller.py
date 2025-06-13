@@ -7,11 +7,11 @@ resultado_torneo_bp = Blueprint('resultado_torneo', __name__)
 # Asignar un nuevo resultado
 @resultado_torneo_bp.route('/crear', methods=['POST'])
 def crear_resultado():
-    posicion = request.form.get('posicion')
-    puntaje = request.form.get('puntaje')
+    posicion = int(request.form.get('posicion'))
+    puntaje = int(request.form.get('puntaje'))
     media_tiempo = request.form.get('media_tiempo')
-    equipo_id = request.form.get('equipo_id')
-    torneo_id = request.form.get('torneo_id')
+    equipo_id = int(request.form.get('equipo_id'))
+    torneo_id = int(request.form.get('torneo_id'))
 
     if not posicion or puntaje is None or not media_tiempo or equipo_id is None or torneo_id is None:
         flash('Faltan datos obligatorios', 'danger')

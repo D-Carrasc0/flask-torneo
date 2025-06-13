@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+from datetime import datetime
 import requests
 
 # Crear Blueprint
@@ -7,16 +8,23 @@ resultado_fase_bp = Blueprint('resultado_fase', __name__)
 # Asignar un nuevo resultado
 @resultado_fase_bp.route('/crear', methods=['POST'])
 def crear_resultado():
-    posicion = request.form.get('posicion')
-    puntaje = request.form.get('puntaje')
+    posicion = int(request.form.get('posicion'))
+    puntaje = int(request.form.get('puntaje'))
     media_tiempo = request.form.get('media_tiempo')
-    equipo_id = request.form.get('equipo_id')
-    fase_id = request.form.get('fase_id')
+    equipo_id = int(request.form.get('equipo_id'))
+    fase_id = int(request.form.get('fase_id'))
 
     if not posicion or puntaje is None or not media_tiempo or equipo_id is None or fase_id is None:
         flash('Faltan datos obligatorios', 'danger')
         return redirect(url_for('resultado_fase.crear_resultado_form'))
 
+    try:
+        # Intentamos convertir la media_tiempo al formato correcto
+        media_tiempo = datetime.strptime(media_tiempo, '%H:%M:%S').time().strftime('%H:%M:%S')
+    except ValueError:
+        flash('Formato de media_tiempo incorrecto. Use HH:MM:SS', 'danger')
+        return redirect(url_for('resultado_fase.crear_resultado_form'))
+    
     resultado_data = {
         'posicion': posicion,
         'puntaje': puntaje,
@@ -43,5 +51,5 @@ def crear_resultado():
 # Ruta para el formulario de creación de resultado
 @resultado_fase_bp.route('/crear/form', methods=['GET'])
 def crear_resultado_form():
-    return render_template('crear_resultado.html')
+    return render_template('crear_resultado_fase.html')
 

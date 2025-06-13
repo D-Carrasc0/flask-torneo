@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+from datetime import datetime
 import requests
 
 # Crear el Blueprint
@@ -10,12 +11,19 @@ def crear_torneo():
     nombre = request.form.get('nombre')
     fecha_inicio = request.form.get('fecha_inicio')
     fecha_termino = request.form.get('fecha_termino')
-    estado = request.form.get('estado')
+    estado = int(request.form.get('estado'))
 
     if not nombre or not fecha_inicio or not fecha_termino or not estado:
         flash('Faltan datos obligatorios', 'danger')
         return redirect(url_for('torneo.crear_torneo_form'))
 
+    try:
+        fecha_inicio = datetime.strptime(fecha_inicio, '%d/%m/%Y').strftime('%Y-%m-%d')
+        fecha_termino = datetime.strptime(fecha_termino, '%d/%m/%Y').strftime('%Y-%m-%d')
+    except ValueError:
+        flash('Formato de fecha incorrecto. Use DD/MM/YYYY', 'danger')
+        return redirect(url_for('torneo.crear_torneo_form'))
+    
     torneo_data = {
         'nombre': nombre,
         'fecha_inicio': fecha_inicio,
