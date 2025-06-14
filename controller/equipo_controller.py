@@ -54,3 +54,19 @@ def inscribir_equipo():
 
     return  render_template('inscribir_equipo.html')
 
+# Ruta para listar todos los equipos
+@equipo_bp.route('/', methods=['GET'])
+def listar_equipos():
+    try:
+        api_url = 'http://localhost:4000/api/equipos' 
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            equipos = response.json()  # Obtenemos los resultados
+            return render_template('listar_equipos.html', equipos=equipos)
+        else:
+            flash("Error al obtener los desafíos", "danger")
+            return render_template('listar_equipos.html', equipos=[])
+    except Exception as e:
+        flash(f"Error al conectar con la API: {str(e)}", "danger")
+        return render_template('listar_equipos.html', equipos=[])

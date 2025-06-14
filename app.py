@@ -13,7 +13,7 @@ app = Flask(__name__)
 app.secret_key = 'secret_key'
 
 # Registrar el blueprint para inscripciones
-app.register_blueprint(equipo_bp, url_prefix='/')
+app.register_blueprint(equipo_bp, url_prefix='/equipo')
 app.register_blueprint(integrante_bp, url_prefix='/integrante')
 app.register_blueprint(fase_bp, url_prefix='/fase')
 app.register_blueprint(desafio_bp, url_prefix='/desafio')

@@ -37,3 +37,20 @@ def crear_registro():
 @registro_bp.route('/crear/form', methods=['GET'])
 def crear_registro_form():
     return render_template('crear_registro_torneo.html')
+
+# Ruta para obtener todos los registros
+@registro_bp.route('/')
+def listar_registros():
+    try:
+        api_url = 'http://localhost:4000/api/registros'
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            registros = response.json()
+            return render_template('listar_registros.html', registros=registros)
+        else:
+            flash("Error al obtener los registros", "danger")
+            return render_template('listar_registros.html', registros=[])
+    except Exception as e:
+        flash(f"Error al conectar con la API: {str(e)}", "danger")
+        return render_template('listar_registros.html', registros=[])

@@ -64,3 +64,20 @@ def crear_respuesta():
 @respuesta_codigo_bp.route('/crear/form', methods=['GET'])
 def crear_respuesta_form():
     return render_template('crear_respuesta_codigo.html')
+
+# Ruta para obtener todas las respuestas
+@respuesta_codigo_bp.route('/')
+def listar_respuestas():
+    try:
+        api_url = 'http://localhost:4000/api/respuestas' 
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            respuestas = response.json()
+            return render_template('listar_respuestas_codigo.html', respuestas=respuestas)
+        else:
+            flash("Error al obtener las respuestas", "danger")
+            return render_template('listar_respuestas_codigo.html', respuestas=[])
+    except Exception as e:
+        flash(f"Error al conectar con la API: {str(e)}", "danger")
+        return render_template('listar_respuestas_codigo.html', respuestas=[])

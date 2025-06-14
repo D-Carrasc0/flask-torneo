@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 import requests
 
 # Crear el Blueprint
@@ -42,3 +42,19 @@ def crear_desafio():
 def crear_desafio_form():
     return render_template('crear_desafio.html')
 
+# Ruta para listar todos los desafíos
+@desafio_bp.route('/', methods=['GET'])
+def listar_desafios():
+    try:
+        api_url = 'http://localhost:4000/api/desafios' 
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            desafios = response.json()  # Obtenemos los resultados
+            return render_template('listar_desafios.html', desafios=desafios)
+        else:
+            flash("Error al obtener los desafíos", "danger")
+            return render_template('listar_desafios.html', desafios=[])
+    except Exception as e:
+        flash(f"Error al conectar con la API: {str(e)}", "danger")
+        return render_template('listar_desafios.html', desafios=[])

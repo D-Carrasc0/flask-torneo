@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Desafíos</title>
+</head>
+<body>
+    <h1>Desafíos</h1>
+    <a href="{{ url_for('desafio.crear_desafio') }}">Crear Nuevo Desafío</a>
+    <ul>
+        {% for desafio in desafios %}
+            <li>
+                <strong>{{ desafio.titulo }}</strong><br>
+                {{ desafio.descripcion }}<br>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

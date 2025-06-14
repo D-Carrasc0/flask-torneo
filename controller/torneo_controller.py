@@ -49,3 +49,20 @@ def crear_torneo():
 @torneo_bp.route('/crear/form', methods=['GET'])
 def crear_torneo_form():
     return render_template('crear_torneo.html')
+
+# Ruta para obtener todos los torneos
+@torneo_bp.route('/')
+def listar_torneos():
+    try:
+        api_url = 'http://localhost:4000/api/torneos' 
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            torneos = response.json()
+            return render_template('listar_torneos.html', torneos=torneos)
+        else:
+            flash("Error al obtener los torneos", "danger")
+            return render_template('listar_torneos.html', torneos=[])
+    except Exception as e:
+        flash(f"Error al conectar con la API: {str(e)}", "danger")
+        return render_template('listar_torneos.html', torneos=[])

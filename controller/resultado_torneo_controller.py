@@ -26,7 +26,7 @@ def crear_resultado():
     }
 
     try:
-        api_url = 'http://localhost:4000/api/resultados' 
+        api_url = 'http://localhost:4000/api/resultados_torneo' 
         response = requests.post(api_url, json=resultado_data)
 
         if response.status_code == 201:
@@ -43,3 +43,20 @@ def crear_resultado():
 @resultado_torneo_bp.route('/crear/form', methods=['GET'])
 def crear_resultado_form():
     return render_template('crear_resultado_torneo.html')
+
+# Ruta para obtener todos los resultados
+@resultado_torneo_bp.route('/')
+def listar_resultados():
+    try:
+        api_url = 'http://localhost:4000/api/resultados_torneo' 
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            resultados = response.json()
+            return render_template('listar_resultados_torneo.html', resultados=resultados)
+        else:
+            flash("Error al obtener los resultados", "danger")
+            return render_template('listar_resultados_torneo.html', resultados=[])
+    except Exception as e:
+        flash(f"Error al conectar con la API: {str(e)}", "danger")
+        return render_template('listar_resultados_torneo.html', resultados=[])

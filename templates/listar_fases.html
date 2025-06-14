@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Fases</title>
+</head>
+<body>
+    <h1>Lista de Fases</h1>
+
+    <ul>
+        {% for fase in fases %}
+            <li>{{ fase.dificultad }} - Torneo ID: {{ fase.torneo_id }}</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('fase.crear_fase') }}">Crear nueva fase</a>
+</body>
+</html>

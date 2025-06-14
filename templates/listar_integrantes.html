@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de Integrantes</title>
+</head>
+<body>
+    <h1>Lista de Integrantes</h1>
+    <ul>
+    {% for integrante in integrantes %}
+        <li>{{ integrante.nombre }} {{ integrante.apellido }} - {{ integrante.correo }}</li>
+    {% else %}
+        <li>No hay integrantes registrados.</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>

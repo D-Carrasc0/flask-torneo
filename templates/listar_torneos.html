@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Torneos</title>
+</head>
+<body>
+    <h1>Torneos</h1>
+    <a href="{{ url_for('torneo.crear_torneo') }}">Crear Nuevo Torneo</a>
+    <ul>
+        {% for torneo in torneos %}
+            <li>
+                <strong>{{ torneo.nombre }}</strong><br>
+                Fecha de inicio: {{ torneo.fecha_inicio }}<br>
+                Fecha de término: {{ torneo.fecha_termino }}<br>
+                Estado: {{ torneo.estado }}<br>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

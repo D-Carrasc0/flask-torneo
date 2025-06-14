@@ -49,3 +49,20 @@ def asignar_integrante():
 @integrante_bp.route('/asignar/form', methods=['GET'])
 def asignar_integrante_form():
     return render_template('asignar_integrante.html')
+
+# Ruta para listar todos los equipos
+@integrante_bp.route('/', methods=['GET'])
+def listar_integrantes():
+    try:
+        api_url = 'http://localhost:4000/api/integrantes/listar-integrantes' 
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            integrantes = response.json()  # Obtenemos los resultados
+            return render_template('listar_equipos_integrantes.html', integrantes=integrantes)
+        else:
+            flash("Error al obtener los desafíos", "danger")
+            return render_template('listar_equipos_integrantes.html', integrantes=[])
+    except Exception as e:
+        flash(f"Error al conectar con la API: {str(e)}", "danger")
+        return render_template('listar_equipos_integrantes.html', integrantes=[])

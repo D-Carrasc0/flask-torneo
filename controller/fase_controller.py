@@ -38,3 +38,19 @@ def crear_fase():
 def crear_fase_form():
     return render_template('crear_fase.html')
 
+# Ruta para listar todas las fases
+@fase_bp.route('/', methods=['GET'])
+def listar_fases():
+    try:
+        api_url = 'http://localhost:4000/api/fases'
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            fases = response.json()  # Obtenemos los resultados
+            return render_template('listar_fases.html', fases=fases)
+        else:
+            flash("Error al obtener las fases", "danger")
+            return render_template('listar_fases.html', fases=[])
+    except Exception as e:
+        flash(f"Error al conectar con la API: {str(e)}", "danger")
+        return render_template('listar_fases.html', fases=[])

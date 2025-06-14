@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Resultados</title>
+</head>
+<body>
+    <h1>Resultados de las Fases</h1>
+    <a href="{{ url_for('resultado_fase.crear_resultado') }}">Crear Nuevo Resultado</a>
+    <ul>
+        {% for resultado in resultados %}
+            <li>
+                Posición: {{ resultado.posicion }} | Puntaje: {{ resultado.puntaje }} | Media de Tiempo: {{ resultado.media_tiempo }}<br>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
