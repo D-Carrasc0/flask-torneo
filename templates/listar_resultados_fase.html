@@ -4,16 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Resultados</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
 </head>
 <body>
     <h1>Resultados de las Fases</h1>
     <a href="{{ url_for('resultado_fase.crear_resultado') }}">Crear Nuevo Resultado</a>
-    <ul>
-        {% for resultado in resultados %}
-            <li>
-                Posición: {{ resultado.posicion }} | Puntaje: {{ resultado.puntaje }} | Media de Tiempo: {{ resultado.media_tiempo }}<br>
-            </li>
-        {% endfor %}
-    </ul>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Posicion: </th>
+                <th>Puntaje: </th>
+                <th>Media de tiempo: </th>
+                <th>Fase: </th>
+                <th>Actualizar: </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for resultado in resultados %}
+            <tr>
+                <td>{{ resultado.posicion }}</td>
+                <td>{{ resultado.puntaje }}</td>
+                <td>{{ resultado.media_tiempo }}</td>
+                <td>{{ resultado.fase_id }}</td>
+                <td><a href="{{ url_for('resultado_fase.obtener_resultado', id=resultado.id_resultado_fase) }}">Actualizar</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>

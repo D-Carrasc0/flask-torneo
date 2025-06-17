@@ -1,13 +1,13 @@
 from flask import Flask, render_template
-from controller.equipo_controller import equipo_bp
-from controller.integrante_controller import integrante_bp 
-from controller.fase_controller import fase_bp
-from controller.desafio_controller import desafio_bp
-from controller.torneo_controller import torneo_bp
-from controller.registro_controller import registro_bp
-from controller.resultado_fase_controller import resultado_fase_bp
-from controller.resultado_torneo_controller import resultado_torneo_bp
-from controller.respuesta_codigo_controller import respuesta_codigo_bp
+from blueprints.equipo_controller import equipo_bp
+from blueprints.integrante_controller import integrante_bp 
+from blueprints.fase_controller import fase_bp
+from blueprints.desafio_controller import desafio_bp
+from blueprints.torneo_controller import torneo_bp
+from blueprints.registro_controller import registro_bp
+from blueprints.resultado_fase_controller import resultado_fase_bp
+from blueprints.resultado_torneo_controller import resultado_torneo_bp
+from blueprints.respuesta_codigo_controller import respuesta_codigo_bp
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
