@@ -8,7 +8,7 @@
 </head>
 <body>
   <div id="topButtons">
-    <a href="{{ url_for('login')}}"><button id="loginBtn">Iniciar sesión</button></a>
+    <a href="{{ url_for('login.formulario_login')}}"><button id="loginBtn">Iniciar sesión</button></a>
     <button id="skipBtn">Saltar Intro</button>
   </div>
   <div id="overlayMensaje">
@@ -22,7 +22,7 @@
     <div id="logoContainer">
       <img id="logoFinal" src="{{url_for('static', filename='img/logoFinal.png')}}" alt="Logo del Torneo">
     </div>
-    <a href="{{ url_for('equipo.inscribir_equipo') }}" id="enterBtn">Inscríbete</a>
+    <a href="{{ url_for('inscripcion.index') }}" id="enterBtn">Inscríbete</a>
   </div>
 </body>
 </html>
