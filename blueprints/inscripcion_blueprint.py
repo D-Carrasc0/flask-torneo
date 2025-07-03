@@ -1,7 +1,8 @@
-from flask import render_template, request, jsonify, Blueprint, flash, redirect, url_for
+from flask import render_template, request, jsonify, Blueprint, flash, redirect, url_for, current_app
 from werkzeug.utils import secure_filename
 import requests
 import os
+import uuid
 
 inscripcion_bp = Blueprint('inscripcion', __name__)
 
@@ -9,8 +10,10 @@ inscripcion_bp = Blueprint('inscripcion', __name__)
 UPLOAD_FOLDER = './static/avatars'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-base_api_url = 'http://localhost:4000/api'
+extensiones_permitidas = ['png', 'jpg', 'jpeg', 'jfif']
 
+def comprobar_extension(filename):
+    return '.' in filename and filename.rsplit('.',1)[1].lower() in extensiones_permitidas
 @inscripcion_bp.route('/')
 def index():
     return render_template('inscripcion.html')
@@ -19,10 +22,10 @@ def index():
 def buscar_usuario():
     term = request.args.get('term', '')
     try:
-        response = requests.get(f'{base_api_url}/integrantes/sugerencias-correo', params={'term': term})
+        url_base_api = current_app.config["URL_BASE_API"]
+        response = requests.get(f'{url_base_api}/integrantes/sugerencias-correo', params={'term': term})
         resultados = response.json()
     except Exception as e:
-        print(f"Error al obtener los datos: {e}")
         resultados = []
 
     return jsonify(resultados)
@@ -32,18 +35,21 @@ def inscribir_equipo():
     nombre_equipo = request.form.get('nombreEquipo')
     pwd_equipo = request.form.get('pwd_equipo')
     avatar = request.files.get('avatar')
-    print(nombre_equipo)
-    print(pwd_equipo)
+
     if not nombre_equipo or not pwd_equipo:
         flash("Todos los campos son obligatorios", "danger")
         return redirect(url_for('inscripcion.index'))  # Redirigir al formulario
 
     # Guardar avatar en /static/avatars/
     avatar_url = "SinAvatar"
-    if avatar:
-        filename = secure_filename(avatar.filename)
+    if avatar and comprobar_extension(avatar.filename):
+        ext = avatar.filename.rsplit('.', 1)[1].lower()
+        filename = f"{uuid.uuid4().hex}.{ext}"
+        filename = secure_filename(filename)
+        
         avatar_path = os.path.join(UPLOAD_FOLDER, filename)
         avatar.save(avatar_path)
+
         avatar_url = f'avatars/{filename}'
 
     # Validar los integrantes
@@ -68,7 +74,8 @@ def inscribir_equipo():
     
     try:
         # Crear el equipo en la API de Node.js
-        api_url = f'{base_api_url}/equipos'
+        url_base_api = current_app.config["URL_BASE_API"]
+        api_url = f'{url_base_api}/equipos'
         response = requests.post(api_url, json=equipo_data)
 
         if response.status_code == 201:
@@ -85,7 +92,7 @@ def inscribir_equipo():
                     'rol_id': rol_id
                 }
 
-                api_url_integrante = f'{base_api_url}/integrantes/asignar-equipo'
+                api_url_integrante = f'{url_base_api}/asignar-equipo'
                 response_integrante = requests.post(api_url_integrante, json=asignar_data)
 
                 if response_integrante.status_code != 200:
@@ -96,11 +103,9 @@ def inscribir_equipo():
             return redirect(url_for('inscripcion.index'))  # Redirigir al índice
 
         else:
-            print("error")
             flash("Error al inscribir el equipo en la API", "danger")
             return redirect(url_for('inscripcion.index'))
 
     except Exception as e:
-        print("eeorr api")
         flash(f"Error al conectar con la API: {str(e)}", "danger")
         return redirect(url_for('inscripcion.index')) 

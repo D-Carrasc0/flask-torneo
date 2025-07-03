@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+from config import config
 from blueprints.equipo_blueprint import equipo_bp
 from blueprints.integrante_blueprint import integrante_bp 
 from blueprints.fase_blueprint import fase_bp
@@ -12,7 +13,8 @@ from blueprints.inscripcion_blueprint import inscripcion_bp
 from blueprints.login_blueprint import login_bp
 
 app = Flask(__name__)
-app.secret_key = 'secret_key'
+
+app.config.update(config)
 
 # Registrar el blueprint para inscripciones
 app.register_blueprint(inscripcion_bp, url_prefix='/inscripcion')
