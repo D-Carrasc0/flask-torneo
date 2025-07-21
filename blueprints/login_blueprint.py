@@ -17,45 +17,23 @@ def login():
 
     try:
         url_base_api = current_app.config["URL_BASE_API"]
-        response = requests.post(f'{url_base_api}/login', json=datos_login)
+        response = requests.post(f'{url_base_api}/equipos/login', json=datos_login)
         data = response.json()
 
         if response.status_code == 200:
-            session['token'] = data['token']
-            session['equipo'] = data['equipo']
-
-            return redirect(url_for('login.perfil'))
+            equipo = data['equipo']
+            
+            session['equipo_id'] = equipo['id_equipo']
+            session['nombre_equipo'] = equipo['nombre_equipo']
+            
+            return redirect(url_for('dashboard_equipo_bp.dashboard_equipo'))
 
         else:
             error_msg = data.get('message', 'Error desconocido')
-            return render_template('login.html', error=error_msg)
+            return render_template('auth/login.html', error=error_msg)
         
     except Exception as e:
-        return render_template('login.html', error=str(e))
-
-@login_bp.route('/perfil')
-def perfil():
-    token = session.get('token')
-
-    if not token:
-        return render_template('auth/login.html', error="Debe iniciar sesión primero"), 401
-
-    headers = {
-        'Authorization': f'Bearer {token}'
-    }
-
-    try:
-        url_base_api = current_app.config["URL_BASE_API"]
-        response = requests.get(f'{url_base_api}/protected/perfil', headers=headers)
-        data = response.json()
-
-        if response.status_code == 200:
-            return render_template('dashboard_usuarios.html', equipo=data["equipo"])
-        else:
-            return render_template('auth/login.html', error=data.get('message', 'Token inválido')), 401
-
-    except Exception as e:
-        return render_template('auth/login.html', error=str(e)), 500
+        return render_template('auth/login.html', error=str(e))
     
 @login_bp.route('/logout')
 def logout():

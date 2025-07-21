@@ -11,6 +11,8 @@ from blueprints.resultado_torneo_blueprint import resultado_torneo_bp
 from blueprints.respuesta_codigo_blueprint import respuesta_codigo_bp
 from blueprints.inscripcion_blueprint import inscripcion_bp
 from blueprints.login_blueprint import login_bp
+from blueprints.dashboard_equipo_blueprint import dashboard_equipo_bp
+
 
 app = Flask(__name__)
 
@@ -28,6 +30,7 @@ app.register_blueprint(registro_bp, url_prefix='/registro')
 app.register_blueprint(resultado_fase_bp, url_prefix='/resultado_fase') 
 app.register_blueprint(resultado_torneo_bp, url_prefix='/resultado_torneo')
 app.register_blueprint(respuesta_codigo_bp, url_prefix='/respuesta_codigo')
+app.register_blueprint(dashboard_equipo_bp)
 
 # Ruta principal
 @app.route('/')
