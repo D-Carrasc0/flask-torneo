@@ -1,99 +1,85 @@
-from flask import Blueprint, request, render_template, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session
 import requests
 
-# Crear el Blueprint
-fase_bp = Blueprint('fase', __name__)
+fase_bp = Blueprint('fase', __name__, url_prefix='/fases')
 
-api_url = 'http://localhost:4000/api/fases'
+def solo_admin(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get('rol') != 'admin':
+            flash("Acceso solo para administradores.", "danger")
+            return redirect(url_for('login.formulario_login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
-# Asignar una fase
-@fase_bp.route('/crear', methods=['GET','POST'])
-def crear_fase():
+@fase_bp.route('/', methods=['GET', 'POST'])
+@solo_admin
+def fase():
+    url_base_api = current_app.config["URL_BASE_API"]
+    headers = {'Clave-De-Autenticacion': current_app.config['TOKEN']}
+
+    # --- CREAR O ACTUALIZAR ---
     if request.method == 'POST':
+        id_fase = request.form.get('id_fase')
         dificultad = request.form.get('dificultad')
-        torneo_id = int(request.form.get('torneo_id'))
-    
+        torneo_id = request.form.get('torneo_id')
+
         if not dificultad or not torneo_id:
             flash('Faltan datos obligatorios', 'danger')
-            return redirect(url_for('fase.crear_fase'))
+            return redirect(url_for('fase.fase'))
 
         fase_data = {
             'dificultad': dificultad,
-            'torneo_id': torneo_id
+            'torneo_id': int(torneo_id)
         }
 
         try:
-            response = requests.post(api_url, json=fase_data)
-
-            if response.status_code == 201:
-                flash('Fase creada correctamente', 'success')
-                return redirect(url_for('fase.lista_fases'))
-            else:
-                flash(f'Error: {response.json().get("error")}', 'danger')
-                return redirect(url_for('fase.crear_fase'))
-
+            if id_fase:  # Actualizar
+                response = requests.put(f'{url_base_api}/fases/{id_fase}', json=fase_data, headers=headers)
+                if response.status_code == 200:
+                    flash("Fase actualizada correctamente", "success")
+                else:
+                    flash("Error al actualizar la fase", "danger")
+            else:  # Crear
+                response = requests.post(f"{url_base_api}/fases", json=fase_data, headers=headers)
+                if response.status_code == 201:
+                    flash('Fase creada correctamente', 'success')
+                else:
+                    flash(f'Error: {response.json().get("error")}', 'danger')
         except Exception as e:
             flash(f'Error al conectar con la API: {str(e)}', 'danger')
-            return redirect(url_for('fase.crear_fase'))
 
-    return render_template('crear_fase.html')
+        return redirect(url_for('fase.fase'))
 
-# Ruta para listar todas las fases
-@fase_bp.route('/', methods=['GET'])
-def listar_fases():
+    # --- LISTAR FASES ---
     try:
-        response = requests.get(api_url)
-
-        if response.status_code == 200:
-            fases = response.json()  # Obtenemos los resultados
-            return render_template('listar_fases.html', fases=fases)
-        else:
-            flash("Error al obtener las fases", "danger")
-            return render_template('listar_fases.html', fases=[])
+        response = requests.get(f"{url_base_api}/fases", headers=headers)
+        fases = response.json() if response.status_code == 200 else []
     except Exception as e:
         flash(f"Error al conectar con la API: {str(e)}", "danger")
-        return render_template('listar_fases.html', fases=[])
-    
-# Ruta para obtener una fase por ID
-@fase_bp.route('/<int:id>', methods=['GET'])
-def obtener_fase(id):
+        fases = []
+
+    # --- LISTAR TORNEOS PARA EL FORMULARIO ---
     try:
-        response = requests.get(f'{api_url}/{id}')
-
-        if response.status_code == 200:
-            fase = response.json()
-            return render_template('actualizar_fase.html', fase=fase)
-        else:
-            flash("Error al obtener la fase", "danger")
-            return render_template('ver_fase.html', fase=[])
+        torneos = requests.get(f"{url_base_api}/torneos", headers=headers).json()
     except Exception as e:
-        flash(f"Error al conectar con la API: {str(e)}", "danger")
-        return render_template('ver_fase.html', fase=[])
-    
-# Ruta para actualizar una fase por ID
-@fase_bp.route('/<int:id>', methods=['POST'])
-def actualizar_fase(id):
-    dificultad = request.json.get('dificultad')
-    torneo_id = request.json.get('torneo_id')
+        torneos = []
 
-    if not dificultad or not torneo_id:
-        flash("Todos los campos son obligatorios", "danger")
-        return redirect(url_for('fase.actualizar_fase', id=id))
+    # --- EDITAR (cargar datos en el form) ---
+    fase_editar = None
+    editar_id = request.args.get('editar')
+    if editar_id:
+        try:
+            response = requests.get(f'{url_base_api}/fases/{editar_id}', headers=headers)
+            if response.status_code == 200:
+                fase_editar = response.json()
+        except Exception as e:
+            flash(f"Error al conectar con la API: {str(e)}", "danger")
 
-    fase_data = {
-        'dificultad': dificultad,
-        'torneo_id': torneo_id
-    }
-
-    try:
-        response = requests.put(f'{api_url}/{id}', json=fase_data)
-
-        if response.status_code == 200:
-            flash("Fase actualizado con éxito", "success")
-            return redirect(url_for('fase.listar_fases'))
-        else:
-            flash("Error al actualizar la fase", "danger")
-            return redirect(url_for('fase.actualizar_fase', id=id))
-    except Exception as e:
-        flash(f"Error al conectar con la API: {str(e)}", "danger")
-        return redirect(url_for('fase.actualizar_fase', id=id))
+    return render_template(
+        'dashboard_admin/fase.html',
+        fases=fases,
+        fase_editar=fase_editar,
+        torneos=torneos
+    )

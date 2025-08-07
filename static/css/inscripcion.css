@@ -19,6 +19,8 @@ body {
     border-radius: 8px;
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
     border: 2px solid #d32f2f;
+    position: relative;
+    z-index: 1;
 }
 
 .title {
@@ -147,4 +149,14 @@ body {
 
 .miembros-table tr.dragover {
   border: 2px dashed #d32f2f;
+}
+
+video {
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
 }

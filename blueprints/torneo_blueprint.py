@@ -1,32 +1,37 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from datetime import datetime
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, session
 import requests
 
-# Crear el Blueprint
-torneo_bp = Blueprint('torneo', __name__)
+torneo_bp = Blueprint('torneo', __name__, url_prefix='/torneos')
 
-api_url = 'http://localhost:4000/api/torneos'
+# Decorador para restringir acceso solo a admin
+def solo_admin(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get('rol') != 'admin':
+            flash("Acceso solo para administradores.", "danger")
+            return redirect(url_for('login.formulario_login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
-# Asignar un nuevo torneo
-@torneo_bp.route('/crear', methods=['GET','POST'])
-def crear_torneo():
+@torneo_bp.route('/', methods=['GET', 'POST'])
+@solo_admin
+def torneo():
+    url_base_api = current_app.config["URL_BASE_API"]
+    headers = {'Clave-De-Autenticacion': current_app.config['TOKEN']}
+
+    # --- CREAR O ACTUALIZAR ---
     if request.method == 'POST':
+        id_torneo = request.form.get('id_torneo')
         nombre = request.form.get('nombre')
         fecha_inicio = request.form.get('fecha_inicio')
         fecha_termino = request.form.get('fecha_termino')
         estado = int(request.form.get('estado'))
 
-        if not nombre or not fecha_inicio or not fecha_termino or not estado:
+        if not nombre or not fecha_inicio or not fecha_termino or estado not in [0, 1]:
             flash('Faltan datos obligatorios', 'danger')
-            return redirect(url_for('torneo.crear_torneo'))
+            return redirect(url_for('torneo.torneo'))
 
-        try:
-            fecha_inicio = datetime.strptime(fecha_inicio, '%d/%m/%Y').strftime('%Y-%m-%d')
-            fecha_termino = datetime.strptime(fecha_termino, '%d/%m/%Y').strftime('%Y-%m-%d')
-        except ValueError:
-            flash('Formato de fecha incorrecto. Use DD/MM/YYYY', 'danger')
-            return redirect(url_for('torneo.crear_torneo'))
-        
         torneo_data = {
             'nombre': nombre,
             'fecha_inicio': fecha_inicio,
@@ -35,81 +40,44 @@ def crear_torneo():
         }
 
         try:
-            response = requests.post(api_url, json=torneo_data)
-
-            if response.status_code == 201:
-                flash('Torneo creado correctamente', 'success')
-                return redirect(url_for('torneo.listar_torneos'))
-            else:
-                flash(f'Error: {response.json().get("error")}', 'danger')
-                return redirect(url_for('torneo.crear_torneo'))
-
+            if id_torneo:  # Actualizar
+                response = requests.put(f'{url_base_api}/torneos/{id_torneo}', json=torneo_data, headers=headers)
+                if response.status_code == 200:
+                    flash("Torneo actualizado correctamente", "success")
+                else:
+                    flash("Error al actualizar el torneo", "danger")
+            else:  # Crear
+                response = requests.post(f"{url_base_api}/torneos", json=torneo_data, headers=headers)
+                if response.status_code == 201:
+                    flash('Torneo creado correctamente', 'success')
+                else:
+                    flash(f'Error: {response.json().get("error")}', 'danger')
         except Exception as e:
             flash(f'Error al conectar con la API: {str(e)}', 'danger')
-            return redirect(url_for('torneo.crear_torneo'))
-        
-    return render_template('crear_torneo.html')
 
-# Ruta para obtener todos los torneos
-@torneo_bp.route('/')
-def listar_torneos():
-    try: 
-        response = requests.get(api_url)
+        return redirect(url_for('torneo.torneo'))
 
-        if response.status_code == 200:
-            torneos = response.json()
-            return render_template('listar_torneos.html', torneos=torneos)
-        else:
-            flash("Error al obtener los torneos", "danger")
-            return render_template('listar_torneos.html', torneos=[])
-    except Exception as e:
-        flash(f"Error al conectar con la API: {str(e)}", "danger")
-        return render_template('listar_torneos.html', torneos=[])
-    
-# Ruta para obtener torneo por ID
-@torneo_bp.route('/<int:id>')
-def obtener_torneo(id):
+    # --- LISTAR TORNEOS ---
     try:
-        response = requests.get(f'{api_url}/{id}')
-
-        if response.status_code == 200:
-            torneo = response.json()
-            return render_template('actualizar_torneo.html', torneo=torneo)
-        else:
-            flash("Torneo no encontrado", "danger")
-            return redirect(url_for('torneo.listar_torneos'))
+        response = requests.get(f"{url_base_api}/torneos", headers=headers)
+        torneos = response.json() if response.status_code == 200 else []
     except Exception as e:
         flash(f"Error al conectar con la API: {str(e)}", "danger")
-        return redirect(url_for('torneo.listar_torneos'))
-    
-# Ruta para actualizar torneo
-@torneo_bp.route('/<int:id>/actualizar', methods=['POST'])
-def actualizar_torneo(id):
-    nombre = request.form.get('nombre')
-    fecha_inicio = request.form.get('fecha_inicio')
-    fecha_termino = request.form.get('fecha_termino')
-    estado = request.form.get('estado')
+        torneos = []
 
-    if not nombre or not fecha_inicio or not fecha_termino or not estado:
-        flash("Todos los campos son obligatorios", "danger")
-        return redirect(url_for('torneo.actualizar_torneo', id=id))
+    # --- EDITAR (cargar datos en el form) ---
+    torneo_editar = None
+    editar_id = request.args.get('editar')
+    if editar_id:
+        try:
+            response = requests.get(f'{url_base_api}/torneos/{editar_id}', headers=headers)
+            if response.status_code == 200:
+                torneo_editar = response.json()
+        except Exception as e:
+            flash(f"Error al conectar con la API: {str(e)}", "danger")
 
-    torneo_data = {
-        'nombre': nombre,
-        'fecha_inicio': fecha_inicio,
-        'fecha_termino': fecha_termino,
-        'estado': estado
-    }
-
-    try:
-        response = requests.put(f'{api_url}/{id}', json=torneo_data)
-
-        if response.status_code == 200:
-            flash("Torneo actualizado con éxito", "success")
-            return redirect(url_for('torneo.listar_torneos'))
-        else:
-            flash("Error al actualizar el torneo", "danger")
-            return redirect(url_for('torneo.obtener_torneo', id=id))
-    except Exception as e:
-        flash(f"Error al conectar con la API: {str(e)}", "danger")
-        return redirect(url_for('torneo.obtener_torneo', id=id))
+    return render_template(
+        'dashboard_admin/torneo.html',
+        torneos=torneos,
+        torneo_editar=torneo_editar
+    )

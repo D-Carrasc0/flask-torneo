@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="{{url_for('static', filename='css/inscripcion.css')}}">
 </head>
 <body>
+  <video id="introVideo" autoplay muted loop playsinline preload="auto">
+    <source src="{{url_for('static', filename='video/muchas.mp4')}}" type="video/mp4">
+    Tu navegador no soporta video HTML5.
+  </video>
   <div class="container">
     <h1 class="title">Inscripción de Equipo</h1>
     <form id="inscripcionForm" method="post" action="{{ url_for('inscripcion.inscribir_equipo') }}">

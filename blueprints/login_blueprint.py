@@ -10,11 +10,25 @@ def formulario_login():
 # Ruta para hacer login
 @login_bp.route('/login', methods=['POST'])
 def login():
-    datos_login = {
-        "nombre_equipo": request.form.get("nombre_equipo"),
-        "pwd": request.form.get("pwd_equipo")
-    }
+    correo = request.form.get("nombre_equipo")
+    pwd = request.form.get("pwd_equipo")
 
+    # Login temporal para admin y juez ya que no esta en la api
+    if correo == "admin@admin.com" and pwd == "admin123":
+        session['rol'] = 'admin'
+        session['correo'] = correo
+        return redirect(url_for('dashboard_admin_bp.dashboard_admin')) 
+    
+    elif correo == "juez@juez.com" and pwd == "juez123":
+        session['rol'] = 'juez'
+        session['correo'] = correo
+        return redirect(url_for('dashboard_juez_bp.dashboard_juez'))
+    
+    datos_login = {
+    "nombre_equipo": correo,
+    "pwd": pwd
+    }
+        
     try:
         url_base_api = current_app.config["URL_BASE_API"]
         response = requests.post(f'{url_base_api}/equipos/login', json=datos_login)
