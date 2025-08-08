@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session, render_template, redirect, url_for, current_app
+from flask import Blueprint, request, jsonify, session, render_template, redirect, url_for, current_app, flash
 import requests
 
 login_bp = Blueprint('login', __name__)
@@ -43,8 +43,9 @@ def login():
             return redirect(url_for('dashboard_equipo_bp.dashboard_equipo'))
 
         else:
-            error_msg = data.get('message', 'Error desconocido')
-            return render_template('auth/login.html', error=error_msg)
+            error_msg = data.get('error') or data.get('message') or "Nombre de equipo o contraseña incorrectos"
+            flash(error_msg, "danger")
+            return render_template('auth/login.html')
         
     except Exception as e:
         return render_template('auth/login.html', error=str(e))

@@ -65,6 +65,11 @@
       
       <button type="submit" class="submit-button">Inscribir equipo</button>
     </form>
+
+    <div class="alert alert-info text-center mb-4" style="background: rgba(30,30,30,0.85); color: #d90429; border: 1.5px solid #d90429;">
+      ¿Ya tienes un equipo? 
+      <a href="{{ url_for('login.formulario_login') }}" class="fw-bold text-escarlata" style="color: #d90429;">Inicia sesión aquí</a>
+    </div>
   </div>
   <script src="{{url_for('static', filename='js/inscripcion.js')}}"></script>
 </body>

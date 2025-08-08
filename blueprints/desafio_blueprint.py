@@ -41,16 +41,20 @@ def desafio():
         try:
             if id_desafio:  # Actualizar
                 response = requests.put(f'{url_base_api}/desafios/{id_desafio}', json=desafio_data, headers=headers)
+                data = response.json()
                 if response.status_code == 200:
-                    flash("Desafío actualizado correctamente", "success")
+                    flash(data.get('message', 'Desafío actualizado correctamente'), "success")
                 else:
-                    flash("Error al actualizar el desafío", "danger")
+                    error_msg = data.get('error') or data.get('message') or 'Error desconocido'
+                    flash(error_msg, "danger")
             else:  # Crear
                 response = requests.post(f"{url_base_api}/desafios", json=desafio_data, headers=headers)
+                data = response.json()
                 if response.status_code == 201:
-                    flash('Desafío creado correctamente', 'success')
+                    flash(data.get('message', 'Desafío creado correctamente'), 'success')
                 else:
-                    flash(f'Error: {response.json().get("error")}', 'danger')
+                    error_msg = data.get('error') or data.get('message') or 'Error desconocido'
+                    flash(error_msg, 'danger')
         except Exception as e:
             flash(f'Error al conectar con la API: {str(e)}', 'danger')
 
@@ -79,6 +83,10 @@ def desafio():
             response = requests.get(f'{url_base_api}/desafios/{editar_id}', headers=headers)
             if response.status_code == 200:
                 desafio_editar = response.json()
+            else:
+                data = response.json()
+                error_msg = data.get('error') or data.get('message') or 'Error desconocido'
+                flash(error_msg, "danger")
         except Exception as e:
             flash(f"Error al conectar con la API: {str(e)}", "danger")
 

@@ -16,7 +16,7 @@ def comprobar_extension(filename):
     return '.' in filename and filename.rsplit('.',1)[1].lower() in extensiones_permitidas
 @inscripcion_bp.route('/')
 def index():
-    return render_template('inscripcion.html')
+    return render_template('auth/inscripcion.html')
 
 @inscripcion_bp.route('/buscar_usuario')
 def buscar_usuario():

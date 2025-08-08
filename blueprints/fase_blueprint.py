@@ -37,16 +37,20 @@ def fase():
         try:
             if id_fase:  # Actualizar
                 response = requests.put(f'{url_base_api}/fases/{id_fase}', json=fase_data, headers=headers)
+                data = response.json()
                 if response.status_code == 200:
-                    flash("Fase actualizada correctamente", "success")
+                    flash(data.get('message', 'Fase actualizada correctamente'), "success")
                 else:
-                    flash("Error al actualizar la fase", "danger")
+                    error_msg = data.get('error') or data.get('message') or 'Error desconocido'
+                    flash(error_msg, "danger")
             else:  # Crear
                 response = requests.post(f"{url_base_api}/fases", json=fase_data, headers=headers)
+                data = response.json()
                 if response.status_code == 201:
-                    flash('Fase creada correctamente', 'success')
+                    flash(data.get('message', 'Fase creada correctamente'), 'success')
                 else:
-                    flash(f'Error: {response.json().get("error")}', 'danger')
+                    error_msg = data.get('error') or data.get('message') or 'Error desconocido'
+                    flash(error_msg, 'danger')
         except Exception as e:
             flash(f'Error al conectar con la API: {str(e)}', 'danger')
 
@@ -74,6 +78,10 @@ def fase():
             response = requests.get(f'{url_base_api}/fases/{editar_id}', headers=headers)
             if response.status_code == 200:
                 fase_editar = response.json()
+            else:
+                data = response.json()
+                error_msg = data.get('error') or data.get('message') or 'Error desconocido'
+                flash(error_msg, "danger")
         except Exception as e:
             flash(f"Error al conectar con la API: {str(e)}", "danger")
 
