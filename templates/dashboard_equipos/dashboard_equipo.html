@@ -94,7 +94,6 @@
                                     </div>
                                 </li>
 
-
                                 <!-- Modal de detalles del desafío -->
                                 <div class="modal fade" id="modalDesafio{{ desafio.id_desafio }}" tabindex="-1" aria-labelledby="modalLabel{{ desafio.id_desafio }}" aria-hidden="true">
                                     <div class="modal-dialog">
@@ -146,30 +145,142 @@
             </div>
         </div>
 
+        <!-- Leaderboard -->
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card bg-dark border-secondary shadow-sm">
+                    <div class="card-header d-flex align-items-center bg-black border-secondary">
+                        <h5 class="mb-0">Leaderboard del Torneo Actual</h5>
+                        <span class="badge bg-danger ms-2">Ranking</span>
+                        <div class="ms-auto small text-muted" id="lb-meta">—</div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover mb-0 align-middle">
+                                <thead class="sticky-top bg-black">
+                                    <tr>
+                                        <th style="width:70px;">Pos</th>
+                                        <th>Equipo</th>
+                                        <th class="text-end">Puntos</th>
+                                        <th class="text-end">Tiempo Medio</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaderboard-body">
+                                    <tr><td colspan="4" class="text-center text-muted py-4">Cargando ranking…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-black border-secondary d-flex justify-content-between">
+                        <div id="lb-mi-pos" class="small">Tu posición: —</div>
+                        <button class="btn btn-sm btn-outline-light" id="lb-refresh">Actualizar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="footer">
             &copy; 2025 Desafío Escarlata &mdash; Todos los derechos reservados
         </div>
     </div>
 
-    <!-- Modal de confirmación de logout -->
+    <!-- Modal logout -->
     <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content bg-dark text-light">
-            <div class="modal-header">
-                <h5 class="modal-title" id="logoutModalLabel">¿Cerrar sesión?</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                ¿Estás seguro de que deseas cerrar sesión y salir del Dashboard?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <a href="{{ url_for('login.logout') }}" class="btn btn-escarlata">Cerrar sesión</a>
-            </div>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutModalLabel">¿Cerrar sesión?</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas cerrar sesión y salir del Dashboard?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <a href="{{ url_for('login.logout') }}" class="btn btn-escarlata">Cerrar sesión</a>
+                </div>
             </div>
         </div>
     </div>
-    
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Leaderboard script -->
+    <script>
+    (() => {
+      const LB_URL = "{{ url_for('ranking.leaderboard') }}";
+      const tbody = document.getElementById('leaderboard-body');
+      const miPosEl = document.getElementById('lb-mi-pos');
+      const metaEl = document.getElementById('lb-meta');
+      const btnRefresh = document.getElementById('lb-refresh');
+
+      function trofeo(pos) {
+        if (pos === 1) return '🥇';
+        if (pos === 2) return '🥈';
+        if (pos === 3) return '🥉';
+        return pos ?? '—';
+      }
+
+      function tiempoToStr(t) {
+        if (!t && t !== 0) return '—';
+        if (typeof t === 'string') return t;
+        if (typeof t === 'number') {
+          const s = Math.floor(t / 1000);
+          const m = Math.floor(s / 60);
+          const r = s % 60;
+          return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`;
+        }
+        return String(t);
+      }
+
+      async function cargar() {
+        try {
+          metaEl.textContent = 'Actualizando…';
+          const res = await fetch(LB_URL, { credentials: 'same-origin' });
+          const data = await res.json();
+          const items = Array.isArray(data.items) ? data.items : [];
+          const miEquipoId = data.equipo_id;
+
+          if (items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">No hay ranking disponible.</td></tr>`;
+            miPosEl.textContent = 'Tu posición: —';
+            metaEl.textContent = '—';
+            return;
+          }
+
+          tbody.innerHTML = items.slice(0, 20).map(row => {
+            const pos = row.posicion;
+            const esYo = String(row.equipo_id) === String(miEquipoId);
+            const nombre = row.nombre_equipo || `Equipo ${row.equipo_id}`;
+            const avatar = row.avatar && row.avatar !== 'SinAvatar'
+              ? `<img src="${row.avatar}" alt="" class="rounded me-2" style="width:24px;height:24px;object-fit:cover;">`
+              : `<span class="badge bg-secondary me-2">E</span>`;
+            return `
+              <tr class="${esYo ? 'table-active' : ''}">
+                <td class="fw-bold">${trofeo(pos)}</td>
+                <td>${avatar}<span class="${esYo ? 'text-danger fw-semibold' : ''}">${nombre}</span></td>
+                <td class="text-end">${row.puntaje ?? 0}</td>
+                <td class="text-end"><span class="text-muted">${tiempoToStr(row.media_tiempo)}</span></td>
+              </tr>
+            `;
+          }).join('');
+
+          const miPos = data.mi_posicion ?? items.find(r => String(r.equipo_id) === String(miEquipoId))?.posicion ?? '—';
+          miPosEl.textContent = `Tu posición: ${miPos}`;
+          metaEl.textContent = `Torneo #${data.torneo_id} • ${new Date().toLocaleTimeString()}`;
+
+        } catch (err) {
+          tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger py-4">No se pudo cargar el ranking.</td></tr>`;
+          miPosEl.textContent = 'Tu posición: —';
+          metaEl.textContent = '—';
+        }
+      }
+
+      btnRefresh?.addEventListener('click', cargar);
+      cargar();
+      setInterval(cargar, 90000);
+    })();
+    </script>
 </body>
 </html>

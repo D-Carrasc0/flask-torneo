@@ -14,6 +14,7 @@ from blueprints.login_blueprint import login_bp
 from blueprints.dashboard_equipo_blueprint import dashboard_equipo_bp
 from blueprints.dashboard_juez_blueprint import dashboard_juez_bp
 from blueprints.dashboard_admin_blueprint import dashboard_admin_bp
+from blueprints.ranking import ranking_bp
 
 app = Flask(__name__)
 
@@ -34,6 +35,7 @@ app.register_blueprint(respuesta_codigo_bp, url_prefix='/respuesta_codigo')
 app.register_blueprint(dashboard_equipo_bp)
 app.register_blueprint(dashboard_juez_bp)
 app.register_blueprint(dashboard_admin_bp)
+app.register_blueprint(ranking_bp)
 
 # Ruta principal
 @app.route('/')
