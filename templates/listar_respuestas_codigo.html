@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>Respuestas del Código</h1>
-    <a href="{{ url_for('respuesta_codigo.crear_respuesta') }}">Crear Nueva Respuesta</a>
+    <a href="{{ url_for('respuesta_codigo_bp.crear_respuesta') }}">Crear Nueva Respuesta</a>
     <table class="table">
         <thead>
             <tr>
@@ -22,7 +22,7 @@
             <tr>
                 <td>{{ respuesta.archivo_nombre }}</td>
                 <td>{{ respuesta.tiempo }}</td>
-                <td><a href="{{ url_for('respuesta_codigo.obtener_respuesta', id=respuesta.id_respuesta_codigo) }}">Actualizar</a></td>
+                <td><a href="{{ url_for('respuesta_codigo_bp.obtener_respuesta', id=respuesta.id_respuesta_codigo) }}">Actualizar</a></td>
             </tr>
             {% endfor %}
         </tbody>

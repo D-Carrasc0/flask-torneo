@@ -109,6 +109,13 @@
                                                 {% if desafio.fecha_limite %}
                                                     <p><strong>Fecha límite:</strong> {{ desafio.fecha_limite }}</p>
                                                 {% endif %}
+                                                
+                                                <!-- Botón para redirigir a crear_respuesta -->
+                                                <div class="d-flex justify-content-end mt-3">
+                                                    <a href="{{ url_for('respuesta_codigo_bp.crear_respuesta') }}?desafio_id={{ desafio.id_desafio }}" class="btn btn-outline-success">
+                                                        <i class="bi bi-upload"></i> Enviar Respuesta
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

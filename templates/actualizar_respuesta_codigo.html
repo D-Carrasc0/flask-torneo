@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Actualizar Respuesta</h1>
-    <form action="{{ url_for('respuesta_codigo.actualizar_respuesta', id=respuesta.id_respuesta_codigo) }}" method="PUT" enctype="multipart/form-data">
+    <form action="{{ url_for('respuesta_codigo_bp.actualizar_respuesta', id=respuesta.id_respuesta_codigo) }}" method="PUT" enctype="multipart/form-data">
         <label for="archivo_nombre">Archivo:</label>
         <input type="file" id="archivo_nombre" name="archivo_nombre" value="{{ respuesta.archivo_nombre }}" required><br><br>
 
@@ -23,7 +23,7 @@
         <button type="submit">Actualizar Respuesta</button>
     </form>
 
-    <a href="{{ url_for('respuesta_codigo.listar_respuestas') }}">Volver a la lista</a>
+    <a href="{{ url_for('respuesta_codigo_bp.listar_respuestas') }}">Volver a la lista</a>
     
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}

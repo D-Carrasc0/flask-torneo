@@ -5,6 +5,11 @@ dashboard_juez_bp = Blueprint('dashboard_juez_bp', __name__)
 
 @dashboard_juez_bp.route('/dashboard/juez', methods=['GET', 'POST'])
 def dashboard_juez():
+
+    if session.get('rol') != 'juez':
+        flash("Acceso solo para jueces.", "danger")
+        return redirect(url_for('login.formulario_login'))
+    
     clave = current_app.config['TOKEN']
     headers = {'Clave-De-Autenticacion': clave}
     url_base_api = current_app.config["URL_BASE_API"]
@@ -20,17 +25,29 @@ def dashboard_juez():
 
     if torneo_id:
         # Obtener desafíos del torneo seleccionado
-        desafios = requests.get(f"{url_base_api}/desafios", headers=headers).json()
-        desafios = [d for d in desafios if str(d['torneo_id']) == str(torneo_id)]
+        desafios_api = requests.get(f"{url_base_api}/desafios", headers=headers).json()
+
+        for d in desafios_api:
+            if str(d.get('torneo_id')) == str(torneo_id):
+                desafios.append(d)
 
     if desafio_id:
         # Obtener respuestas de ese desafío
         respuestas = requests.get(f"{url_base_api}/respuestas", headers=headers).json()
-        envios = [r for r in respuestas if str(r['desafio_id']) == str(desafio_id)]
+
+        for r in respuestas:
+            if str(r.get('desafio_id')) == str(desafio_id):
+                envios.append(r)
 
         # Obtener equipos para hacer el join y mostrar el nombre
         equipos = requests.get(f"{url_base_api}/equipos", headers=headers).json()
-        equipos_dict = {e['CodigoEquipo']: e['NombreEquipo'] for e in equipos}
+        equipos_dict = {}
+        
+        for e in equipos:
+            cod = e.get('CodigoEquipo')
+            nombre = e.get('NombreEquipo')
+            if cod is not None:
+                equipos_dict[cod] = nombre
 
         for envio in envios:
             envio['nombre_equipo'] = equipos_dict.get(envio['equipo_id'], 'Desconocido')

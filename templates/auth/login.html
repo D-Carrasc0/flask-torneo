@@ -14,10 +14,18 @@
       <img class="mb-4" src="{{url_for('static',filename='img/logoFinal.png')}}" alt="" width="72" height="72">
   
       <h1 class="h3 mb-3 font-weight-normal">Bienvenido </h1>
-      {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
-      {% endif %}
-
+      {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container mt-3">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
       <label for="nombre_equipo" class="sr-only">Equipo</label>
       <input type="text" id="nombre_equipo" name="nombre_equipo" class="form-control" placeholder="Nombre Equipo" required>
 
@@ -30,5 +38,6 @@
       </a>
       <p class="mt-5 mb-3 text-white">&copy; 2025</p>
     </form>
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

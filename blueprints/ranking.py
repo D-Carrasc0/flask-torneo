@@ -25,19 +25,32 @@ def leaderboard():
     except Exception as e:
         return jsonify({"error": "Fallo al conectar con la API", "detail": str(e)}), 502
 
-    # Opcional: torneo_id actual en sesión o query
+    # torneo_id actual en sesión
     torneo_id = request.args.get('torneo_id', type=int)
 
     if not torneo_id:
         # Detectar el torneo más reciente en el que el equipo participó
-        recientes = [r for r in resultados if int(r.get('equipo_id', 0)) == int(equipo_id)]
+        recientes = []
+
+        for r in resultados:
+            try:
+                if int(r.get('equipo_id', 0)) == int(equipo_id):
+                    recientes.append(r)
+            except Exception:
+                continue
+
         recientes.sort(key=lambda x: x.get('torneo_id', 0), reverse=True)
         torneo_id = recientes[0]['torneo_id'] if recientes else None
 
     if not torneo_id:
         return jsonify({"items": [], "torneo_id": None, "equipo_id": equipo_id, "mi_posicion": None})
 
-    ranking = [r for r in resultados if r.get('torneo_id') == torneo_id]
+    # Filtrar resultados por torneo_id   
+    ranking = []
+
+    for r in resultados:
+        if r.get('torneo_id') == torneo_id:
+            ranking.append(r)
 
     # Ordenar por posición (o puntaje descendente como fallback)
     for r in ranking:
@@ -48,7 +61,13 @@ def leaderboard():
     ranking.sort(key=lambda x: (x['pos'] is None, x['pos'] if x['pos'] is not None else -x['pts']), reverse=False)
 
     # Añadir nombre/avatar
-    eq_map = {e['CodigoEquipo']: e for e in equipos}
+    eq_map = {}
+
+    for e in equipos:
+        codigo = e.get('CodigoEquipo')
+        if codigo is not None:
+            eq_map[codigo] = e
+
     for r in ranking:
         e_info = eq_map.get(r['equipo_id']) or {}
         r['nombre_equipo'] = e_info.get('nombre_equipo') or e_info.get('NombreEquipo') or f"Equipo {r['equipo_id']}"
@@ -58,7 +77,14 @@ def leaderboard():
         r['media_tiempo'] = r['tiempo']
 
     # Detectar posición propia
-    mi = next((r for r in ranking if int(r.get('equipo_id')) == int(equipo_id)), None)
+    mi = None
+    for r in ranking:
+        try:
+            if int(r.get('equipo_id')) == int(equipo_id):
+                mi = r
+                break
+        except Exception:
+            continue
 
     return jsonify({
         "torneo_id": torneo_id,
