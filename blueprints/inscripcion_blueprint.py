@@ -21,9 +21,10 @@ def index():
 @inscripcion_bp.route('/buscar_usuario')
 def buscar_usuario():
     term = request.args.get('term', '')
+    headers = {'Clave-De-Autenticacion': current_app.config['TOKEN']}
     try:
         url_base_api = current_app.config["URL_BASE_API"]
-        response = requests.get(f'{url_base_api}/integrantes/sugerencias-correo', params={'term': term})
+        response = requests.get(f'{url_base_api}/integrantes/sugerencias-correo', params={'term': term}, headers=headers)
         resultados = response.json()
     except Exception as e:
         resultados = []
@@ -74,9 +75,10 @@ def inscribir_equipo():
     
     try:
         # Crear el equipo en la API de Node.js
+        headers = {'Clave-De-Autenticacion': current_app.config['TOKEN']}
         url_base_api = current_app.config["URL_BASE_API"]
         api_url = f'{url_base_api}/equipos'
-        response = requests.post(api_url, json=equipo_data)
+        response = requests.post(api_url, json=equipo_data, headers=headers)
 
         if response.status_code == 201:
             equipo_id = response.json().get('id_equipo')
@@ -93,7 +95,7 @@ def inscribir_equipo():
                 }
 
                 api_url_integrante = f'{url_base_api}/asignar-equipo'
-                response_integrante = requests.post(api_url_integrante, json=asignar_data)
+                response_integrante = requests.post(api_url_integrante, json=asignar_data, headers=headers)
 
                 if response_integrante.status_code != 200:
                     flash(f'Error al asignar el integrante con correo {correo}: {response_integrante.json().get("error")}', 'danger')
